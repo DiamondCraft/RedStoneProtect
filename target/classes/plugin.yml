@@ -1,0 +1,9 @@
+author: Tjs238
+database: true
+description: Let users protect their own land with potion protect!
+generator: http://dinnerbone.com/minecraft/tools/pluginator/
+main: me.tjs238.plugins.potionprotect.Potionprotect
+name: PotionProtect
+startup: postworld
+url: http://diamondcraft.co/
+version: '1.0'

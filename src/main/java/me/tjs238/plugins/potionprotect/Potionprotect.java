@@ -1,6 +1,7 @@
 package me.tjs238.plugins.potionprotect;
 
 import com.sk89q.minecraft.util.commands.CommandException;
+import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.IncompleteRegionException;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
@@ -10,6 +11,9 @@ import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.regions.RegionSelector;
 import com.sk89q.worldedit.regions.*;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
+import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
+import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.Bukkit;
@@ -79,7 +83,13 @@ public class Potionprotect extends JavaPlugin implements Listener {
                 Logger.getLogger(Potionprotect.class.getName()).log(Level.SEVERE, null, ex);
             }
             
-            BlockVector
+            BlockVector min = sel.getNativeMinimumPoint().toBlockVector();
+            BlockVector max = sel.getNativeMaximumPoint().toBlockVector();
+            ProtectedRegion pr;
+            Random generator2 = new Random( 19580427 );
+            if (player.hasPermission("dc.protect")) {
+                pr = new ProtectedCuboidRegion(player.getName()+generator2, min, max);
+            }
             
         }
     }
