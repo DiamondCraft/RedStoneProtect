@@ -37,10 +37,12 @@ public class Potionprotect extends JavaPlugin implements Listener {
     private PluginDescriptionFile description;
     private String prefix;
     
+    @Override
     public void onDisable() {
         // TODO: Place any custom disable code here.
     }
-
+    
+    @Override
     public void onEnable() {
         log = Logger.getLogger("Minecraft");
         description = getDescription();
