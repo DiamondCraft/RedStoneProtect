@@ -7,3 +7,4 @@ name: PotionProtect
 startup: postworld
 url: http://diamondcraft.co/
 version: '1.0'
+depends: [WorldGuard]

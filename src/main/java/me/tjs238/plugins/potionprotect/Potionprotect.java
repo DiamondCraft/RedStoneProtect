@@ -16,26 +16,28 @@ import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Server;
+import net.milkbowl.vault.Vault;
+import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.conversations.*;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.PotionSplashEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class Potionprotect extends JavaPlugin implements Listener {
+public class Potionprotect extends JavaPlugin implements Listener, ConversationAbandonedListener {
     public Server server = Bukkit.getServer();
     private Logger log;
     private PluginDescriptionFile description;
     private String prefix;
+    private ConversationFactory conversationFactory;
     
     @Override
     public void onDisable() {
@@ -48,10 +50,152 @@ public class Potionprotect extends JavaPlugin implements Listener {
         description = getDescription();
         prefix = "["+description.getName()+"] ";
         log("Starting up...");
+        getWorldGuard();
+        getVault();
         getServer().getPluginManager().registerEvents(this, this);
     }
+    
+    public Potionprotect() {
+        this.conversationFactory = new ConversationFactory(this)
+                .withModality(true)
+                .withPrefix(new RegionSpawningPrefix())
+                .withFirstPrompt(new WhichSizePrompt())
+                .withEscapeSequence("/quit")
+                .withTimeout(10)
+                .thatExcludesNonPlayersWithMessage("Players Only")
+                .addConversationAbandonedListener(this);
+                
+    }
 
+    public void conversationAbandoned(ConversationAbandonedEvent cae) {
+        if (cae.gracefulExit()) {
+            cae.getContext().getForWhom().sendRawMessage("Conversation exited gracefully");
+        } else {
+            cae.getContext().getForWhom().sendRawMessage(("Conversation abandoned by"+ cae.getCanceller().getClass().getName()));
+        }
+    }
+    
+    private class WhichSizePrompt extends FixedSetPrompt {
+        public WhichSizePrompt() {
+            super("10", "20", "30", "None");
+        }
+        public String getPromptText(ConversationContext context) {
+            return "What size region would you like to create? " + formatFixedSet();
+        }
+        
+        @Override
+        protected Prompt acceptValidatedInput(ConversationContext context, String s) {
+            if (s.equals("None")) {
+                return Prompt.END_OF_CONVERSATION;
+            }
+            context.setSessionData("type", s);
+            return new AreYouSurePrompt();
+        }
+    }
+    
+    private class AreYouSurePrompt extends FixedSetPrompt {
+        public AreYouSurePrompt() {
+            super("Yes", "No");
+        }
+        
+        public String getPromptText(ConversationContext context) {
+            return "Are you sure you want to make this region? "+formatFixedSet();
+        }
+        
+        @Override
+        protected Prompt acceptValidatedInput(ConversationContext context, String s) {
+            if (s.equals("No")) {
+                return Prompt.END_OF_CONVERSATION;
+            }
+            context.setSessionData("agreed", s);
+            return new ForWhomPrompt(context.getPlugin());
+        }
+    }
+    
+    private class ForWhomPrompt extends PlayerNamePrompt {
+        public ForWhomPrompt(Plugin plugin) {
+            super(plugin);
+        }
+
+        public String getPromptText(ConversationContext context) {
+            return "Who should receive your region?";
+        }
+
+        @Override
+        protected Prompt acceptValidatedInput(ConversationContext context, Player player) {
+            context.setSessionData("who", player);
+            return new SpawnRegionPrompt();
+        }
+
+        @Override
+        protected String getFailedValidationText(ConversationContext context, String invalidInput) {
+            return invalidInput + " is not online!";
+        }
+    }
+    
+    private class SpawnRegionPrompt extends MessagePrompt {
+        public String getPromptText(ConversationContext context) {
+            Player player = (Player)context.getSessionData("who");
+            String type = (String)context.getSessionData("type");
+            
+            return "Still working on this!!!";
+        }
+        
+        @Override
+        protected Prompt getNextPrompt(ConversationContext context) {
+            return Prompt.END_OF_CONVERSATION;
+        }
+    }
+    
+    private class RegionSpawningPrefix implements ConversationPrefix {
+        public String getPrefix(ConversationContext context) {
+            String what = (String)context.getSessionData("type");
+            Player who = (Player)context.getSessionData("who");
+            
+            if (what != null && who == null) {
+                return ChatColor.AQUA+"DCR-Region:"+what+": ";
+            }
+            if (what != null && who == null) {
+                return ChatColor.AQUA+"DCR-Region:"+what+"-Player: "+who+": ";
+            }
+            return ChatColor.AQUA+"DCR: ";
+        }
+    }
+    
+    public WorldGuardPlugin getWorldGuard()
+    {
+        Plugin plugin = getServer().getPluginManager().getPlugin("WorldGuard");
+        if ((plugin == null) || (!(plugin instanceof WorldGuardPlugin)))
+        {
+            return null; //throws a NullPointerException, telling the Admin that WG is not loaded.
+        }
+        return (WorldGuardPlugin)plugin;
+    }
+    
+    public Vault getVault() {
+        Plugin vault = getServer().getPluginManager().getPlugin("Vault");
+        if ((vault == null) || (!(vault instanceof Vault))) {
+            return null;
+        }
+        return (Vault)vault;
+    }
+    
     @EventHandler
+    public void onBlockPlaced(BlockPlaceEvent event) {
+        Block block = event.getBlock();
+        Player player = event.getPlayer();
+        
+        if(block.getType().equals(Material.REDSTONE_ORE)) {
+            if (player instanceof Conversable) {
+                conversationFactory.buildConversation((Conversable)player).begin();
+            } else {
+                player.sendMessage(ChatColor.RED+"Error: 1908");
+                player.sendMessage(ChatColor.RED+"Please contact Staff!");
+            }
+        }
+    }
+
+    /*@EventHandler
     public void onItemDrop(PlayerDropItemEvent event) throws IncompleteRegionException {
         if (event.isCancelled()) {
             return;
@@ -94,7 +238,7 @@ public class Potionprotect extends JavaPlugin implements Listener {
             }
             
         }
-    }
+    }*/
     
     public void log(String message){
         log.info(prefix+message);
