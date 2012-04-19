@@ -45,14 +45,15 @@
             <type>jar</type>
         </dependency>
         <dependency>
-            <groupId>com.sk89q.worldguard</groupId>
-            <artifactId>worldguard</artifactId>
-            <version>579</version>
-        </dependency>
-        <dependency>
             <groupId>net.milkbowl.vault</groupId>
             <artifactId>vault</artifactId>
             <version>1.2.15</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>com.sk89q.worldguard</groupId>
+            <artifactId>worldguard</artifactId>
+            <version>579</version>
             <type>jar</type>
         </dependency>
     </dependencies>

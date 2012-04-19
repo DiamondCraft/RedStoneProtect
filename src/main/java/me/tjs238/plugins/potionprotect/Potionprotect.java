@@ -1,19 +1,14 @@
 package me.tjs238.plugins.potionprotect;
 
-import com.sk89q.minecraft.util.commands.CommandException;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.IncompleteRegionException;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
-import com.sk89q.worldedit.bukkit.selections.Selection;
-import com.sk89q.worldedit.regions.CuboidRegion;
-import com.sk89q.worldedit.regions.Region;
-import com.sk89q.worldedit.regions.RegionSelector;
-import com.sk89q.worldedit.regions.*;
+import com.sk89q.worldedit.regions.CuboidRegionSelector;
+import com.sk89q.worldedit.regions.RegionOperationException;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
-import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import java.util.Random;
 import java.util.logging.Level;
@@ -22,14 +17,10 @@ import net.milkbowl.vault.Vault;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.conversations.*;
-import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.entity.PotionSplashEvent;
-import org.bukkit.event.player.PlayerDropItemEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
@@ -42,6 +33,10 @@ public class Potionprotect extends JavaPlugin implements Listener, ConversationA
     private PluginDescriptionFile description;
     private String prefix;
     private ConversationFactory conversationFactory;
+    public WorldGuardPlugin worldGuard;
+    private Location pos1;
+    private Location pos2;
+    //public ProtectedRegion region;
     
     @Override
     public void onDisable() {
@@ -54,8 +49,7 @@ public class Potionprotect extends JavaPlugin implements Listener, ConversationA
         description = getDescription();
         prefix = "["+description.getName()+"] ";
         log("Starting up...");
-        getWorldGuard();
-        getVault();
+        worldGuard = getWorldGuard();
         getServer().getPluginManager().registerEvents(this, this);
     }
     
@@ -193,14 +187,6 @@ public class Potionprotect extends JavaPlugin implements Listener, ConversationA
         return (WorldEditPlugin)plugin;
     }
     
-    public Vault getVault() {
-        Plugin vault = getServer().getPluginManager().getPlugin("Vault");
-        if ((vault == null) || (!(vault instanceof Vault))) {
-            return null;
-        }
-        return (Vault)vault;
-    }
-    
     @EventHandler
     public void onBlockPlaced(BlockPlaceEvent event) {
         Block block = event.getBlock();
@@ -221,19 +207,28 @@ public class Potionprotect extends JavaPlugin implements Listener, ConversationA
         }
     }
     
-    @SuppressWarnings("deprecation")
     public void createRegion(Player player, String size) throws RegionOperationException, IncompleteRegionException {
         Vector vector = new Vector();
         //WorldEditPlugin worldEdit = (WorldEditPlugin)getServer().getPluginManager().getPlugin("WorldEdit");
         //WorldGuardPlugin worldGuard = (WorldGuardPlugin)getServer().getPluginManager().getPlugin("WorldGuard");
         log("Getting WorldGuard");
-        WorldGuardPlugin worldGuard = getWorldGuard();
+        if (worldGuard == null) {
+            return;
+        }
         log("Getting WorldEdit");
         WorldEditPlugin worldEdit = getWorldEdit();
         CuboidRegionSelector selector = new CuboidRegionSelector();
         log("Setting the points");
-        Location pos1 = player.getLocation().add(10, 0 ,10);
-        Location pos2 = player.getLocation().subtract(10, 0, 10);
+        if (size.equals("10")) {
+            this.pos1 = player.getLocation().add(5, 0 ,5);
+            this.pos2 = player.getLocation().subtract(5, 0, 5);
+        } else if (size.equals("20")) {
+            this.pos1 = player.getLocation().add(10, 0, 10);
+            this.pos2 = player.getLocation().subtract(10, 0, 0);
+        } else if (size.equals("40")) {
+            this.pos1 = player.getLocation().add(20, 0 , 10);
+            this.pos2 = player.getLocation().subtract(20, 0 , 10);
+        }
         log("Setting the vectors");
         Vector vpos1 = vector.add(pos1.getBlockX(), pos1.getBlockY(), pos1.getBlockZ());
         Vector vpos2 = vector.add(pos2.getBlockX(), pos2.getBlockY(), pos2.getBlockZ());
@@ -250,7 +245,7 @@ public class Potionprotect extends JavaPlugin implements Listener, ConversationA
             log("Making it top to bottom");
                 selector.getRegion().expand(
                             new Vector(0, (player.getWorld().getMaxHeight() +1), 0),
-                            new Vector(0, (player.getWorld().getMaxHeight() - 1), 0)
+                            new Vector(0, -(player.getWorld().getMaxHeight() - 1), 0)
                             );
                 log("Learning that");
                 selector.learnChanges();
@@ -261,13 +256,14 @@ public class Potionprotect extends JavaPlugin implements Listener, ConversationA
         RegionManager rm = worldGuard.getGlobalRegionManager().get(player.getWorld());
         log("Getting random number");
         Random rand = new Random();
-        ProtectedRegion region;
+        ProtectedRegion pr;
         int range1 = rand.nextInt(20);
         if (player.hasPermission("dc.protect")) {
             log("Setting region");
             String rname = player.getName()+"_"+range1;
-            region = new ProtectedCuboidRegion(rname, min, max);
-            rm.addRegion(region);
+            RegionHandler rh = new RegionHandler(worldGuard,min,max,rname,player,this);
+            //pr = new ProtectedCuboidRegion(rname, min, max);
+            //rm.addRegion(pr);
             log("Region created with name: "+rname);
         }
         
