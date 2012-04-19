@@ -222,14 +222,14 @@ public class Potionprotect extends JavaPlugin implements Listener, ConversationA
         CuboidRegionSelector selector = new CuboidRegionSelector();
         log("Setting the points");
         if (size.equals("10")) {
-            this.pos1 = player.getLocation().add(5, 0 ,5);
-            this.pos2 = player.getLocation().subtract(5, 0, 5);
+            this.pos1 = player.getLocation().add(5, player.getLocation().getBlockY(), 5);
+            this.pos2 = player.getLocation().subtract(5, player.getLocation().getBlockY(), 5);
         } else if (size.equals("20")) {
-            this.pos1 = player.getLocation().add(10, 0, 10);
-            this.pos2 = player.getLocation().subtract(10, 0, 0);
+            this.pos1 = player.getLocation().add(10, player.getLocation().getBlockY(), 10);
+            this.pos2 = player.getLocation().subtract(10, player.getLocation().getBlockY(), 0);
         } else if (size.equals("40")) {
-            this.pos1 = player.getLocation().add(20, 0 , 10);
-            this.pos2 = player.getLocation().subtract(20, 0 , 10);
+            this.pos1 = player.getLocation().add(20, player.getLocation().getBlockY() , 10);
+            this.pos2 = player.getLocation().subtract(20, player.getLocation().getBlockY(), 10);
         }
         log("Setting the vectors");
         Vector vpos1 = vector.add(pos1.getBlockX(), pos1.getBlockY(), pos1.getBlockZ());
