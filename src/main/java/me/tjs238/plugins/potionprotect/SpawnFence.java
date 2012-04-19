@@ -34,6 +34,7 @@ public class SpawnFence {
             int affected;
             BaseBlock bb = new BaseBlock(85);
             try {
+                
                 es.makeCuboidWalls(selector.getRegion(), bb);
             } catch (IncompleteRegionException ex) {
                 Logger.getLogger(SpawnFence.class.getName()).log(Level.SEVERE, null, ex);

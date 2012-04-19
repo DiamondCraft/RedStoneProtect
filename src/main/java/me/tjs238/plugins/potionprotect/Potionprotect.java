@@ -222,24 +222,30 @@ public class Potionprotect extends JavaPlugin implements Listener, ConversationA
         CuboidRegionSelector selector = new CuboidRegionSelector();
         log("Setting the points");
         if (size.equals("10")) {
-            this.pos1 = player.getLocation().add(5, player.getLocation().getBlockY(), 5);
-            this.pos2 = player.getLocation().subtract(5, player.getLocation().getBlockY(), 5);
+            this.pos1 = player.getLocation().add(5, player.getLocation().getY(), 5);
+            this.pos2 = player.getLocation().subtract(5, player.getLocation().getY(), 5);
+            Vector vpos1 = vector.add(pos1.getX(), pos1.getY(), pos1.getZ());
+            Vector vpos2 = vector.add(pos2.getX(), pos2.getY(), pos2.getZ());
+            SpawnFence.SpawnFence(vpos1,vpos2,size,worldEdit);
+            selector.selectPrimary(vpos1);
+            selector.selectSecondary(vpos2);
         } else if (size.equals("20")) {
-            this.pos1 = player.getLocation().add(10, player.getLocation().getBlockY(), 10);
-            this.pos2 = player.getLocation().subtract(10, player.getLocation().getBlockY(), 0);
+            this.pos1 = player.getLocation().add(10, player.getLocation().getY(), 10);
+            this.pos2 = player.getLocation().subtract(10, player.getLocation().getY(), 0);
+            Vector vpos1 = vector.add(pos1.getX(), pos1.getY(), pos1.getZ());
+            Vector vpos2 = vector.add(pos2.getX(), pos2.getY(), pos2.getZ());
+            SpawnFence.SpawnFence(vpos1,vpos2,size,worldEdit);
+            selector.selectPrimary(vpos1);
+            selector.selectSecondary(vpos2);
         } else if (size.equals("40")) {
-            this.pos1 = player.getLocation().add(20, player.getLocation().getBlockY() , 10);
-            this.pos2 = player.getLocation().subtract(20, player.getLocation().getBlockY(), 10);
+            this.pos1 = player.getLocation().add(20, player.getLocation().getY() , 10);
+            this.pos2 = player.getLocation().subtract(20, player.getLocation().getY(), 10);
+            Vector vpos1 = vector.add(pos1.getX(), pos1.getY(), pos1.getZ());
+            Vector vpos2 = vector.add(pos2.getX(), pos2.getY(), pos2.getZ());
+            SpawnFence.SpawnFence(vpos1,vpos2,size,worldEdit);
+            selector.selectPrimary(vpos1);
+            selector.selectSecondary(vpos2);
         }
-        log("Setting the vectors");
-        Vector vpos1 = vector.add(pos1.getBlockX(), pos1.getBlockY(), pos1.getBlockZ());
-        Vector vpos2 = vector.add(pos2.getBlockX(), pos2.getBlockY(), pos2.getBlockZ());
-        log("Spawning the fence");
-        SpawnFence.SpawnFence(vpos1,vpos2,size,worldEdit);
-        log("Selecting primary");
-        selector.selectPrimary(vpos1);
-        log("Selecting secondary");
-        selector.selectSecondary(vpos2);
         log("Learning changes");
         selector.learnChanges();
         
