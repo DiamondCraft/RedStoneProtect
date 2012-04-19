@@ -3,7 +3,9 @@ package me.tjs238.plugins.potionprotect;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.IncompleteRegionException;
 import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
+import com.sk89q.worldedit.patterns.Pattern;
 import com.sk89q.worldedit.regions.CuboidRegionSelector;
 import com.sk89q.worldedit.regions.RegionOperationException;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
@@ -179,12 +181,12 @@ public class Potionprotect extends JavaPlugin implements Listener, ConversationA
         return (WorldGuardPlugin)plugin;
     }
     
-    public WorldEditPlugin getWorldEdit() {
+    public WorldEdit getWorldEdit() {
         Plugin plugin = getServer().getPluginManager().getPlugin("WorldEdit");
-        if ((plugin == null) || (!(plugin instanceof WorldEditPlugin))) {
+        if ((plugin == null) || (!(plugin instanceof WorldEdit))) {
             return null;
         }
-        return (WorldEditPlugin)plugin;
+        return (WorldEdit)plugin;
     }
     
     @EventHandler
@@ -216,7 +218,7 @@ public class Potionprotect extends JavaPlugin implements Listener, ConversationA
             return;
         }
         log("Getting WorldEdit");
-        WorldEditPlugin worldEdit = getWorldEdit();
+        WorldEdit worldEdit = getWorldEdit();
         CuboidRegionSelector selector = new CuboidRegionSelector();
         log("Setting the points");
         if (size.equals("10")) {
@@ -232,12 +234,15 @@ public class Potionprotect extends JavaPlugin implements Listener, ConversationA
         log("Setting the vectors");
         Vector vpos1 = vector.add(pos1.getBlockX(), pos1.getBlockY(), pos1.getBlockZ());
         Vector vpos2 = vector.add(pos2.getBlockX(), pos2.getBlockY(), pos2.getBlockZ());
+        log("Spawning the fence");
+        SpawnFence.SpawnFence(vpos1,vpos2,size,worldEdit);
         log("Selecting primary");
         selector.selectPrimary(vpos1);
         log("Selecting secondary");
         selector.selectSecondary(vpos2);
         log("Learning changes");
         selector.learnChanges();
+        
         log("Getting the selection above");
         if (player == null) {
             return;
