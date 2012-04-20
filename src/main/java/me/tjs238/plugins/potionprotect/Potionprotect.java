@@ -214,15 +214,15 @@ public class Potionprotect extends JavaPlugin implements Listener, ConversationA
             selector.selectSecondary(vpos2);
         } else if (size.equals("20")) {
             this.pos1 = player.getLocation().add(10, player.getLocation().getY(), 10);
-            this.pos2 = player.getLocation().subtract(10, player.getLocation().getY(), 0);
+            this.pos2 = player.getLocation().subtract(10, player.getLocation().getY(), 10);
             Vector vpos1 = vector.add(pos1.getX(), pos1.getY(), pos1.getZ());
             Vector vpos2 = vector.add(pos2.getX(), pos2.getY(), pos2.getZ());
             SpawnFence.SpawnFence(vpos1,vpos2,size,worldEdit,player);
             selector.selectPrimary(vpos1);
             selector.selectSecondary(vpos2);
         } else if (size.equals("40")) {
-            this.pos1 = player.getLocation().add(20, player.getLocation().getY() , 10);
-            this.pos2 = player.getLocation().subtract(20, player.getLocation().getY(), 10);
+            this.pos1 = player.getLocation().add(20, player.getLocation().getY() , 20);
+            this.pos2 = player.getLocation().subtract(20, player.getLocation().getY(), 20);
             Vector vpos1 = vector.add(pos1.getX(), pos1.getY(), pos1.getZ());
             Vector vpos2 = vector.add(pos2.getX(), pos2.getY(), pos2.getZ());
             SpawnFence.SpawnFence(vpos1,vpos2,size,worldEdit,player);
