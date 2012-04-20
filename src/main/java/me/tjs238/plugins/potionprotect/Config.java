@@ -16,6 +16,7 @@ import org.bukkit.configuration.file.FileConfiguration;
  */
 public class Config {
     private Potionprotect plugin;
+    public String cprefix;
     public Config (Potionprotect plugin) {
         this.plugin = plugin;
     }
@@ -25,7 +26,7 @@ public class Config {
         config = plugin.getConfig();
         if (!configFile.exists() || config.getInt("version") != 1.3) {
             plugin.log("No config found, creating a fresh one!");
-            config.set("prefix", "[RP]");
+            config.set("prefix", "[DCR]");
             config.set("version", 1.3);
             config.set("region.sizes.1", "10");
             config.set("region.sizes.2", "20");
@@ -38,6 +39,7 @@ public class Config {
             }
         } else {
             plugin.log("Config Loaded!");
+            cprefix = config.getString("prefix");
         }
     }
 }

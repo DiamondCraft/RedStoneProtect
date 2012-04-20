@@ -16,6 +16,7 @@ import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.milkbowl.vault.Vault;
+import net.milkbowl.vault.economy.Economy;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.conversations.*;
@@ -27,6 +28,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class Potionprotect extends JavaPlugin implements Listener, ConversationAbandonedListener {
@@ -39,6 +41,7 @@ public class Potionprotect extends JavaPlugin implements Listener, ConversationA
     private Location pos1;
     private Location pos2;
     public Config config = new Config(this);
+    public static Economy economy = null;
     //public ProtectedRegion region;
     
     @Override
@@ -55,6 +58,17 @@ public class Potionprotect extends JavaPlugin implements Listener, ConversationA
         worldGuard = getWorldGuard();
         getServer().getPluginManager().registerEvents(this, this);
         config.loadConfig();
+        setupEconomy();
+    }
+    
+    private boolean setupEconomy()
+    {
+        RegisteredServiceProvider<Economy> economyProvider = getServer().getServicesManager().getRegistration(net.milkbowl.vault.economy.Economy.class);
+        if (economyProvider != null) {
+            economy = economyProvider.getProvider();
+        }
+
+        return (economy != null);
     }
     
     public Potionprotect() {
@@ -120,6 +134,26 @@ public class Potionprotect extends JavaPlugin implements Listener, ConversationA
         public String getPromptText(ConversationContext context) {
             Player player = (Player)context.getSessionData("who");
             String type = (String)context.getSessionData("type");
+            if (type.equals("10")) {
+                if (economy.has(player.getPlayerListName(), 200))
+                economy.withdrawPlayer(player.getPlayerListName(), 200);
+                else {
+                   return "You do not have enough! You need $200 for a 10x10!";
+                }  
+            } else if(type.equals("20")) {
+                if (economy.has(player.getPlayerListName(), 1000))
+                    economy.withdrawPlayer(player.getPlayerListName(), 1000);
+                else
+                    return "You do not have enough! You need $1000 for a 20x20!";
+            } else if (type.equals("40")) {
+                if(player.hasPermission("dc.protection.40")) {
+                    if (economy.has(player.getPlayerListName(), 4000))
+                        economy.withdrawPlayer(player.getPlayerListName(), 4000);
+                    else
+                        return "You do not have enough! You need $4000 for a 40x40!";
+                } else
+                    return "You must be VIP + to generate a 40x40 Region!";
+            }
             try {
                 if (player != null)
                 createRegion(player, type);
