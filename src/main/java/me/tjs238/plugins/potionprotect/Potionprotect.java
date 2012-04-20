@@ -38,6 +38,7 @@ public class Potionprotect extends JavaPlugin implements Listener, ConversationA
     public WorldGuardPlugin worldGuard;
     private Location pos1;
     private Location pos2;
+    public Config config = new Config(this);
     //public ProtectedRegion region;
     
     @Override
@@ -53,6 +54,7 @@ public class Potionprotect extends JavaPlugin implements Listener, ConversationA
         log("Starting up...");
         worldGuard = getWorldGuard();
         getServer().getPluginManager().registerEvents(this, this);
+        config.loadConfig();
     }
     
     public Potionprotect() {
@@ -89,25 +91,6 @@ public class Potionprotect extends JavaPlugin implements Listener, ConversationA
                 return Prompt.END_OF_CONVERSATION;
             }
             context.setSessionData("type", s);
-            return new AreYouSurePrompt();
-        }
-    }
-    
-    private class AreYouSurePrompt extends FixedSetPrompt {
-        public AreYouSurePrompt() {
-            super("Yes", "No", "yes", "no");
-        }
-        
-        public String getPromptText(ConversationContext context) {
-            return "Are you sure you want to make this region? [Yes, No]";
-        }
-        
-        @Override
-        protected Prompt acceptValidatedInput(ConversationContext context, String s) {
-            if (s.equals("No") || s.equals("no")) {
-                return Prompt.END_OF_CONVERSATION;
-            }
-            context.setSessionData("agreed", s);
             return new ForWhomPrompt(context.getPlugin());
         }
     }
@@ -147,7 +130,7 @@ public class Potionprotect extends JavaPlugin implements Listener, ConversationA
             } catch (IncompleteRegionException ex) {
                 Logger.getLogger(Potionprotect.class.getName()).log(Level.SEVERE, null, ex);
             }
-            return "Still working on this!!!";
+            return "Created a"+type+"by"+type+" region for: "+player.getName();
         }
         
         @Override
@@ -226,7 +209,7 @@ public class Potionprotect extends JavaPlugin implements Listener, ConversationA
             this.pos2 = player.getLocation().subtract(5, player.getLocation().getY(), 5);
             Vector vpos1 = vector.add(pos1.getX(), pos1.getY(), pos1.getZ());
             Vector vpos2 = vector.add(pos2.getX(), pos2.getY(), pos2.getZ());
-            SpawnFence.SpawnFence(vpos1,vpos2,size,worldEdit);
+            SpawnFence.SpawnFence(vpos1,vpos2,size,worldEdit,player);
             selector.selectPrimary(vpos1);
             selector.selectSecondary(vpos2);
         } else if (size.equals("20")) {
@@ -234,7 +217,7 @@ public class Potionprotect extends JavaPlugin implements Listener, ConversationA
             this.pos2 = player.getLocation().subtract(10, player.getLocation().getY(), 0);
             Vector vpos1 = vector.add(pos1.getX(), pos1.getY(), pos1.getZ());
             Vector vpos2 = vector.add(pos2.getX(), pos2.getY(), pos2.getZ());
-            SpawnFence.SpawnFence(vpos1,vpos2,size,worldEdit);
+            SpawnFence.SpawnFence(vpos1,vpos2,size,worldEdit,player);
             selector.selectPrimary(vpos1);
             selector.selectSecondary(vpos2);
         } else if (size.equals("40")) {
@@ -242,7 +225,7 @@ public class Potionprotect extends JavaPlugin implements Listener, ConversationA
             this.pos2 = player.getLocation().subtract(20, player.getLocation().getY(), 10);
             Vector vpos1 = vector.add(pos1.getX(), pos1.getY(), pos1.getZ());
             Vector vpos2 = vector.add(pos2.getX(), pos2.getY(), pos2.getZ());
-            SpawnFence.SpawnFence(vpos1,vpos2,size,worldEdit);
+            SpawnFence.SpawnFence(vpos1,vpos2,size,worldEdit,player);
             selector.selectPrimary(vpos1);
             selector.selectSecondary(vpos2);
         }
