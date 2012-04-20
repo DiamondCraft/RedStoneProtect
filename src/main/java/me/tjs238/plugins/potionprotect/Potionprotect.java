@@ -79,7 +79,7 @@ public class Potionprotect extends JavaPlugin implements Listener, ConversationA
     
     private class WhichSizePrompt extends FixedSetPrompt {
         public WhichSizePrompt() {
-            super("10", "20", "30", "None");
+            super("10", "20", "40", "None");
         }
         public String getPromptText(ConversationContext context) {
             return "What size region would you like to create? " + formatFixedSet();
