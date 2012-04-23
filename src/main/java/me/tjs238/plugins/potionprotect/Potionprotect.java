@@ -96,6 +96,9 @@ public class Potionprotect extends JavaPlugin implements Listener, ConversationA
             super("10", "20", "40", "None");
         }
         public String getPromptText(ConversationContext context) {
+            Player player = (Player)context.getForWhom();
+            if(player.hasPermission("dc.region.vip"))
+                return "What size region would you like to create? 10, 20, 40";
             return "What size region would you like to create? " + formatFixedSet();
         }
         
@@ -179,12 +182,12 @@ public class Potionprotect extends JavaPlugin implements Listener, ConversationA
             Player who = (Player)context.getSessionData("who");
             
             if (what != null && who == null) {
-                return ChatColor.AQUA+"[DCR]Region-Size:"+what+": ";
+                return ChatColor.AQUA+config.cprefix+" Region-Size:"+what+": ";
             }
             if (what != null && who != null) {
-                return ChatColor.AQUA+"[DCR]Region-Size:"+what+" Player: "+who.getDisplayName()+": ";
+                return ChatColor.AQUA+config.cprefix+" Region-Size:"+what+" Player: "+who.getDisplayName()+": ";
             }
-            return ChatColor.AQUA+"[DCR] ";
+            return ChatColor.AQUA+config.cprefix+" ";
         }
     }
     
@@ -198,12 +201,12 @@ public class Potionprotect extends JavaPlugin implements Listener, ConversationA
         return (WorldGuardPlugin)plugin;
     }
     
-    public WorldEdit getWorldEdit() {
+    public WorldEditPlugin getWorldEdit() {
         Plugin plugin = getServer().getPluginManager().getPlugin("WorldEdit");
-        if ((plugin == null) || (!(plugin instanceof WorldEdit))) {
+        if ((plugin == null) || (!(plugin instanceof WorldEditPlugin))) {
             return null;
         }
-        return (WorldEdit)plugin;
+        return (WorldEditPlugin)plugin;
     }
     
     @EventHandler
@@ -213,7 +216,12 @@ public class Potionprotect extends JavaPlugin implements Listener, ConversationA
         
         if(block.getType().equals(Material.REDSTONE_ORE)) {
             if (player instanceof Conversable && player.hasPermission("dc.protect.block")) {
-                player.sendMessage(ChatColor.AQUA+"[DCR]Starting Region Build...");
+                player.sendMessage(ChatColor.AQUA+config.cprefix+"Starting Region Build...");
+                player.sendMessage(ChatColor.LIGHT_PURPLE+"Region Prices:");
+                player.sendMessage((ChatColor.LIGHT_PURPLE+"10x10 - $100"));
+                player.sendMessage(ChatColor.LIGHT_PURPLE+"20x20 - $1000");
+                if (player.hasPermission("dc.region.vip"))
+                player.sendMessage(ChatColor.LIGHT_PURPLE+"40x40 - $4000");
                 conversationFactory.buildConversation((Conversable)player).begin();
                 event.setCancelled(true);
                 ItemStack redstone = new ItemStack(Material.REDSTONE_ORE, 1);
@@ -235,34 +243,57 @@ public class Potionprotect extends JavaPlugin implements Listener, ConversationA
             return;
         }
         log("Getting WorldEdit");
-        WorldEdit worldEdit = getWorldEdit();
+        WorldEditPlugin worldEdit = getWorldEdit();
+        WorldEdit we = worldEdit.getWorldEdit();
         CuboidRegionSelector selector = new CuboidRegionSelector();
+        SpawnFence sf = new SpawnFence(this);
+        if (player == null) {
+            return;
+        }
         log("Setting the points");
         if (size.equals("10")) {
+            log("Getting point1");
             this.pos1 = player.getLocation().add(5, player.getLocation().getY(), 5);
+            log("Getting point2");
             this.pos2 = player.getLocation().subtract(5, player.getLocation().getY(), 5);
+            log("Setting Vector 1");
             Vector vpos1 = vector.add(pos1.getX(), pos1.getY(), pos1.getZ());
+            log("Setting Vector 2");
             Vector vpos2 = vector.add(pos2.getX(), pos2.getY(), pos2.getZ());
-            SpawnFence.SpawnFence(vpos1,vpos2,size,worldEdit,player);
+            log("Spawning the fence");
+            if (we == null)
+                return;
+            sf.SpawnFence(vpos1, vpos2, size, player, this);
+            if (selector == null) 
+                return;
+            log("Selecting Primary Point");
             selector.selectPrimary(vpos1);
+            log("Selecting Secondary Point");
             selector.selectSecondary(vpos2);
         } else if (size.equals("20")) {
             this.pos1 = player.getLocation().add(10, player.getLocation().getY(), 10);
             this.pos2 = player.getLocation().subtract(10, player.getLocation().getY(), 10);
             Vector vpos1 = vector.add(pos1.getX(), pos1.getY(), pos1.getZ());
             Vector vpos2 = vector.add(pos2.getX(), pos2.getY(), pos2.getZ());
-            SpawnFence.SpawnFence(vpos1,vpos2,size,worldEdit,player);
+            sf.SpawnFence(vpos1,vpos2,size,player, this);
+            if (selector == null)
+                return;
             selector.selectPrimary(vpos1);
             selector.selectSecondary(vpos2);
         } else if (size.equals("40")) {
+            if (!player.hasPermission("dc.region.vip")) 
+                return;
             this.pos1 = player.getLocation().add(20, player.getLocation().getY() , 20);
             this.pos2 = player.getLocation().subtract(20, player.getLocation().getY(), 20);
             Vector vpos1 = vector.add(pos1.getX(), pos1.getY(), pos1.getZ());
             Vector vpos2 = vector.add(pos2.getX(), pos2.getY(), pos2.getZ());
-            SpawnFence.SpawnFence(vpos1,vpos2,size,worldEdit,player);
+            sf.SpawnFence(vpos1,vpos2,size,player.getPlayer(), this);
+            if (selector == null)
+                return;
             selector.selectPrimary(vpos1);
             selector.selectSecondary(vpos2);
-        }
+        } else if (size.isEmpty())
+            return;
         log("Learning changes");
         selector.learnChanges();
         

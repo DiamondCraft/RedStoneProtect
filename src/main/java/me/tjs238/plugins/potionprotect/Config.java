@@ -24,9 +24,9 @@ public class Config {
     public void loadConfig() {
         File configFile = new File("plugins/Potionprotect", "config.yml");
         config = plugin.getConfig();
-        if (!configFile.exists() || config.getInt("version") != 1.3) {
+        if (!configFile.exists()) {
             plugin.log("No config found, creating a fresh one!");
-            config.set("prefix", "[DCR]");
+            config.set("prefix", "[RP]");
             config.set("version", 1.3);
             config.set("region.sizes.1", "10");
             config.set("region.sizes.2", "20");

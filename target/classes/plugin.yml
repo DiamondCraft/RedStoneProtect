@@ -4,5 +4,6 @@ description: Let users protect their own land with potion protect!
 main: me.tjs238.plugins.potionprotect.Potionprotect
 name: PotionProtect
 url: http://diamondcraft.co/
-version: '1.1'
-depends: WorldGuard
+version: '1.3'
+depends: [WorldGuard, WorldEdit]
+softdepends: [Vault]

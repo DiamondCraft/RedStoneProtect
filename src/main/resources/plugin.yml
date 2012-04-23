@@ -5,4 +5,5 @@ main: me.tjs238.plugins.potionprotect.Potionprotect
 name: PotionProtect
 url: http://diamondcraft.co/
 version: '1.3'
-depends: [WorldGuard, Vault]
+depends: [WorldGuard, WorldEdit]
+softdepends: [Vault]

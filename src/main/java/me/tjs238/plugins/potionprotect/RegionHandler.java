@@ -5,13 +5,19 @@
 package me.tjs238.plugins.potionprotect;
 
 import com.sk89q.worldedit.BlockVector;
+import com.sk89q.worldguard.LocalPlayer;
+import com.sk89q.worldguard.bukkit.BukkitPlayer;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
+import com.sk89q.worldguard.domains.DefaultDomain;
+import com.sk89q.worldguard.protection.UnsupportedIntersectionException;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.bukkit.entity.Player;
 
 
@@ -29,13 +35,26 @@ public class RegionHandler {
         }
         RegionManager rm = wg.getGlobalRegionManager().get(player.getWorld());
         pr = new ProtectedCuboidRegion(pname, min, max);
+        List<ProtectedRegion> overlap = new ArrayList<ProtectedRegion>();
+        /*try {
+            overlap.add(pr.getIntersectingRegions(overlap));
+            overlap.
+        } catch (UnsupportedIntersectionException ex) {
+            Logger.getLogger(RegionHandler.class.getName()).log(Level.SEVERE, null, ex);
+        }*/
         if (rm.hasRegion(pname)) {
             Random rand = new Random();
             int range1 = rand.nextInt(200);
             String rname = player.getName()+"_"+range1;
             pr = new ProtectedCuboidRegion(rname,min,max);
-        }
+            //rm.getRegion(pr);        
+            }
         plugin.log("Creating the region from another class");
+        //pr.getIntersectingRegions(overlap);
         rm.addRegion(pr);
+        DefaultDomain df = new DefaultDomain();
+        BukkitPlayer bp = new BukkitPlayer(wg, player);
+        df.addPlayer(bp);
+        rm.getRegion(pname).setOwners(df);
     }
 }
