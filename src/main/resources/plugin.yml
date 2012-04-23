@@ -7,3 +7,8 @@ url: http://diamondcraft.co/
 version: '1.3'
 depends: [WorldGuard, WorldEdit]
 softdepends: [Vault]
+commands:
+  groupset:
+    description: Set the ranks of donors
+    usage: /groupset <player> <group> [world]
+    aliases: gs

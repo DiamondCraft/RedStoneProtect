@@ -59,6 +59,9 @@ public class Potionprotect extends JavaPlugin implements Listener, ConversationA
         getServer().getPluginManager().registerEvents(this, this);
         config.loadConfig();
         setupEconomy();
+        log("Set up commands");
+        GroupSet gs = new GroupSet(this);
+        getCommand("groupset").setExecutor(gs);
     }
     
     private boolean setupEconomy()
